@@ -20,6 +20,9 @@
             padding: 5px;
             text-align: left;
         }
+        #downPayment, #estimatedInsurancePortion {
+            color: green; /* Green text color for specific input fields */
+        }
     </style>
 </head>
 <body>
@@ -109,16 +112,12 @@
                 }
                 $('#paymentSchedule').html(scheduleHTML);
 
-                $('#emailButton').prop('disabled', false);
-                $('#pdfButton').prop('disabled', false);
             });
 
             $('#clearButton').click(function() {
                 $('#loanForm')[0].reset();
                 $('#results').empty();
                 $('#paymentSchedule').empty();
-                $('#emailButton').prop('disabled', true);
-                $('#pdfButton').prop('disabled', true);
             });
         });
     </script>
