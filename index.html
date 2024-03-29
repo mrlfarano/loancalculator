@@ -10,14 +10,15 @@
         .container {
             margin-top: 20px;
         }
-        .result-section {
+        .result-section, .payment-schedule-table {
             margin-top: 20px;
-        }
-        .button-group {
-            margin-top: 10px;
         }
         .button-group button {
             margin-right: 10px; /* Spacing between buttons */
+        }
+        .payment-schedule-table th, .payment-schedule-table td {
+            padding: 5px;
+            text-align: left;
         }
     </style>
 </head>
@@ -29,24 +30,24 @@
                 <!-- Input form -->
                 <form id="loanForm">
                     <div class="form-group">
-                        <label for="totalAmount">Total Amount</label>
-                        <input type="number" class="form-control" id="totalAmount" required>
+                        <label for="totalCostForTreatment">Total Cost for Treatment</label>
+                        <input type="number" class="form-control" id="totalCostForTreatment" required>
                     </div>
                     <div class="form-group">
-                        <label for="taxes">Taxes</label>
-                        <input type="number" class="form-control" id="taxes">
-                    </div>
-                    <div class="form-group">
-                        <label for="fees">Fees</label>
-                        <input type="number" class="form-control" id="fees">
-                    </div>
-                    <div class="form-group">
-                        <label for="loanMonths">Number of Months</label>
-                        <input type="number" class="form-control" id="loanMonths" required>
+                        <label for="additionalCharges">Additional Charges</label>
+                        <input type="number" class="form-control" id="additionalCharges" required>
                     </div>
                     <div class="form-group">
                         <label for="downPayment">Down Payment</label>
-                        <input type="number" class="form-control" id="downPayment">
+                        <input type="number" class="form-control" id="downPayment" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="estimatedInsurancePortion">Estimated Insurance Portion</label>
+                        <input type="number" class="form-control" id="estimatedInsurancePortion" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="numberOfMonths">Number of Months</label>
+                        <input type="number" class="form-control" id="numberOfMonths" required>
                     </div>
                     <div class="form-group">
                         <label for="firstPaymentDate">Date of First Payment</label>
@@ -61,10 +62,13 @@
                 </form>
             </div>
             <div class="col-md-6">
-                <!-- Results -->
+                <!-- Results and Payment Schedule -->
                 <div class="result-section" id="results">
                     <!-- Results will be displayed here -->
                 </div>
+                <table class="payment-schedule-table" id="paymentSchedule">
+                    <!-- Payment schedule will be displayed here -->
+                </table>
             </div>
         </div>
     </div>
@@ -78,31 +82,35 @@
             $('#loanForm').on('submit', function(e) {
                 e.preventDefault();
                 
-                var totalAmount = parseFloat($('#totalAmount').val());
-                var taxes = parseFloat($('#taxes').val() || 0);
-                var fees = parseFloat($('#fees').val() || 0);
-                var loanMonths = parseInt($('#loanMonths').val());
-                var downPayment = parseFloat($('#downPayment').val() || 0);
+                var totalCostForTreatment = parseFloat($('#totalCostForTreatment').val());
+                var additionalCharges = parseFloat($('#additionalCharges').val());
+                var downPayment = parseFloat($('#downPayment').val());
+                var estimatedInsurancePortion = parseFloat($('#estimatedInsurancePortion').val());
+                var numberOfMonths = parseInt($('#numberOfMonths').val());
                 var firstPaymentDate = new Date($('#firstPaymentDate').val());
 
-                var finalLoanAmount = totalAmount + taxes + fees - downPayment;
+                var totalTreatmentFee = totalCostForTreatment + additionalCharges;
+                var amountFinancedInOffice = totalTreatmentFee - downPayment - estimatedInsurancePortion;
+
                 var annualInterestRate = 0.05; // Example: 5% annual interest
                 var monthlyInterestRate = annualInterestRate / 12;
-
-                var monthlyPayment = (finalLoanAmount * monthlyInterestRate) / 
-                                     (1 - Math.pow(1 + monthlyInterestRate, -loanMonths));
+                var monthlyPayment = (amountFinancedInOffice * monthlyInterestRate) / 
+                                     (1 - Math.pow(1 + monthlyInterestRate, -numberOfMonths));
 
                 var resultsHTML = "<h3>Results:</h3>";
+                resultsHTML += "<p>Total Treatment Fee: $" + totalTreatmentFee.toFixed(2) + "</p>";
+                resultsHTML += "<p>Amount Financed in Office: $" + amountFinancedInOffice.toFixed(2) + "</p>";
                 resultsHTML += "<p>Monthly Payment: $" + monthlyPayment.toFixed(2) + "</p>";
-
-                resultsHTML += "<p>Payment Dates:</p><ul>";
-                for (var i = 0; i < loanMonths; i++) {
-                    firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 1);
-                    resultsHTML += "<li>" + firstPaymentDate.toDateString() + "</li>";
-                }
-                resultsHTML += "</ul>";
-
                 $('#results').html(resultsHTML);
+
+                var paymentDate = new Date(firstPaymentDate.getTime());
+                var scheduleHTML = "<tr><th>Payment Date</th><th>Amount Due</th></tr>";
+                for (var i = 0; i < numberOfMonths; i++) {
+                    paymentDate.setMonth(paymentDate.getMonth() + 1);
+                    scheduleHTML += "<tr><td>" + paymentDate.toDateString() + "</td><td>$" + monthlyPayment.toFixed(2) + "</td></tr>";
+                }
+                $('#paymentSchedule').html(scheduleHTML);
+
                 $('#emailButton').prop('disabled', false);
                 $('#pdfButton').prop('disabled', false);
             });
@@ -110,6 +118,7 @@
             $('#clearButton').click(function() {
                 $('#loanForm')[0].reset();
                 $('#results').empty();
+                $('#paymentSchedule').empty();
                 $('#emailButton').prop('disabled', true);
                 $('#pdfButton').prop('disabled', true);
             });
