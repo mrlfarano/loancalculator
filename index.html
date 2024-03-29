@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Estimate Calculator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            margin-top: 20px;
+        }
+        .result-section {
+            margin-top: 20px;
+        }
+        .button-group {
+            margin-top: 10px;
+        }
+        .button-group button {
+            margin-right: 10px; /* Spacing between buttons */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Loan Estimate Calculator</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Input form -->
+                <form id="loanForm">
+                    <div class="form-group">
+                        <label for="totalAmount">Total Amount</label>
+                        <input type="number" class="form-control" id="totalAmount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taxes">Taxes</label>
+                        <input type="number" class="form-control" id="taxes">
+                    </div>
+                    <div class="form-group">
+                        <label for="fees">Fees</label>
+                        <input type="number" class="form-control" id="fees">
+                    </div>
+                    <div class="form-group">
+                        <label for="loanMonths">Number of Months</label>
+                        <input type="number" class="form-control" id="loanMonths" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="downPayment">Down Payment</label>
+                        <input type="number" class="form-control" id="downPayment">
+                    </div>
+                    <div class="form-group">
+                        <label for="firstPaymentDate">Date of First Payment</label>
+                        <input type="date" class="form-control" id="firstPaymentDate" required>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">Calculate</button>
+                        <button type="button" class="btn btn-secondary" id="clearButton">Clear</button>
+                        <button type="button" class="btn btn-success" id="emailButton" disabled>Send to Email</button>
+                        <button type="button" class="btn btn-info" id="pdfButton" disabled>Export to PDF</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <!-- Results -->
+                <div class="result-section" id="results">
+                    <!-- Results will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- Custom Script for Calculations and Clear Function -->
+    <script>
+        $(document).ready(function() {
+            $('#loanForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                var totalAmount = parseFloat($('#totalAmount').val());
+                var taxes = parseFloat($('#taxes').val() || 0);
+                var fees = parseFloat($('#fees').val() || 0);
+                var loanMonths = parseInt($('#loanMonths').val());
+                var downPayment = parseFloat($('#downPayment').val() || 0);
+                var firstPaymentDate = new Date($('#firstPaymentDate').val());
+
+                var finalLoanAmount = totalAmount + taxes + fees - downPayment;
+                var annualInterestRate = 0.05; // Example: 5% annual interest
+                var monthlyInterestRate = annualInterestRate / 12;
+
+                var monthlyPayment = (finalLoanAmount * monthlyInterestRate) / 
+                                     (1 - Math.pow(1 + monthlyInterestRate, -loanMonths));
+
+                var resultsHTML = "<h3>Results:</h3>";
+                resultsHTML += "<p>Monthly Payment: $" + monthlyPayment.toFixed(2) + "</p>";
+
+                resultsHTML += "<p>Payment Dates:</p><ul>";
+                for (var i = 0; i < loanMonths; i++) {
+                    firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 1);
+                    resultsHTML += "<li>" + firstPaymentDate.toDateString() + "</li>";
+                }
+                resultsHTML += "</ul>";
+
+                $('#results').html(resultsHTML);
+                $('#emailButton').prop('disabled', false);
+                $('#pdfButton').prop('disabled', false);
+            });
+
+            $('#clearButton').click(function() {
+                $('#loanForm')[0].reset();
+                $('#results').empty();
+                $('#emailButton').prop('disabled', true);
+                $('#pdfButton').prop('disabled', true);
+            });
+        });
+    </script>
+</body>
+</html>
