@@ -33,6 +33,10 @@
                 <!-- Input form -->
                 <form id="loanForm">
                     <div class="form-group">
+                        <label for="nameField">Name</label>
+                        <input type="text" class="form-control" id="nameField" required>
+                    </div>
+                    <div class="form-group">
                         <label for="totalCostForTreatment">Total Cost for Treatment</label>
                         <input type="number" class="form-control" id="totalCostForTreatment" required>
                     </div>
@@ -83,6 +87,7 @@
             $('#loanForm').on('submit', function(e) {
                 e.preventDefault();
                 
+                var name = $('#nameField').val();
                 var totalCostForTreatment = parseFloat($('#totalCostForTreatment').val());
                 var additionalCharges = parseFloat($('#additionalCharges').val());
                 var downPayment = parseFloat($('#downPayment').val());
@@ -98,7 +103,7 @@
                 var monthlyPayment = (amountFinancedInOffice * monthlyInterestRate) / 
                                      (1 - Math.pow(1 + monthlyInterestRate, -numberOfMonths));
 
-                var resultsHTML = "<h3>Results:</h3>";
+                var resultsHTML = "<h3>Results for " + name + ":</h3>";
                 resultsHTML += "<p>Total Treatment Fee: $" + totalTreatmentFee.toFixed(2) + "</p>";
                 resultsHTML += "<p>Amount Financed in Office: $" + amountFinancedInOffice.toFixed(2) + "</p>";
                 resultsHTML += "<p>Monthly Payment: $" + monthlyPayment.toFixed(2) + "</p>";
